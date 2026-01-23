@@ -35,6 +35,7 @@ router.get("/me", requireAuth, getProfile);
 // ✅ GET USER BY ID
 router.get("/:id", requireAuth, getUserById);
 
+// ✅ GET ALL USERS
 router.get("/", getAllUsers);
 
 export default router;

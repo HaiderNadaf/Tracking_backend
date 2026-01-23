@@ -225,3 +225,28 @@ export const getUserTodayTrackingById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//get all user tracking history
+export const getAllUsersTrackingHistory = async (req, res) => {
+  try {
+    const sessions = await TrackingSession.find({})
+      .populate("userId", "name phone")
+      .sort({ startTime: -1 }); // latest first
+
+    const data = sessions.map((s) => ({
+      sessionId: s._id,
+      user: s.userId, // { name, phone }
+      date: s.date,
+      startTime: s.startTime,
+      endTime: s.endTime || null,
+    }));
+
+    res.json({
+      total: data.length,
+      records: data,
+    });
+  } catch (err) {
+    console.error("ALL HISTORY ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
