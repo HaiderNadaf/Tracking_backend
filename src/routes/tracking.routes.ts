@@ -8,6 +8,8 @@ import {
   getUserDayTracking,
   getUserTodayTrackingById,
   getAllUsersTrackingHistory,
+  getUserLatestTrackingById,
+  getTrackingBySessionId,
 } from "../controllers/tracking.controller.js";
 
 import { requireAuth } from "../middlewares/auth.js";
@@ -23,6 +25,8 @@ router.post("/stop", requireAuth, stopTracking);
 router.get("/today", getTodayAllTracking);
 router.get("/day", getUserDayTracking);
 router.get("/history", getAllUsersTrackingHistory);
+router.get("/user/:userId", getUserLatestTrackingById);
+router.get("/session/:sessionId", getTrackingBySessionId);
 
 // USER DETAILS
 router.get("/user/:userId", getUserTodayTrackingById);
