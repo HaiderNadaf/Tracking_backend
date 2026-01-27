@@ -592,3 +592,57 @@ export const getTrackingBySessionId = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getUserTodayTrackingById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const today = new Date().toISOString().split("T")[0];
+
+    const session = await TrackingSession.findOne({
+      userId,
+      date: today,
+    }).populate("userId", "name phone");
+
+    if (!session) {
+      return res.json({ user: null, session: null, points: [] });
+    }
+
+    const points = await LocationPoint.find({
+      sessionId: session._id,
+    }).sort({ timestamp: 1 });
+
+    res.json({
+      user: session.userId,
+      session,
+      points,
+    });
+  } catch (err) {
+    console.error("USER TRACK ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getAllUsersTrackingHistory = async (req, res) => {
+  try {
+    const sessions = await TrackingSession.find({})
+      .populate("userId", "name phone")
+      .sort({ startTime: -1 }); // latest first
+
+    const data = sessions.map((s) => ({
+      sessionId: s._id,
+      user: s.userId, // { name, phone }
+      date: s.date,
+      startTime: s.startTime,
+      endTime: s.endTime || null,
+    }));
+
+    res.json({
+      total: data.length,
+      records: data,
+    });
+  } catch (err) {
+    console.error("ALL HISTORY ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
