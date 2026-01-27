@@ -54,7 +54,7 @@ export const onboardAggregator = async (req: Request, res: Response) => {
   } catch (e: any) {
     console.error("❌ Onboard error:", e);
 
-    // Mongo duplicate safety
+    // Mongo duplicate safetys
     if (e.code === 11000) {
       return res.status(409).json({
         message: "Aggregator already present",
