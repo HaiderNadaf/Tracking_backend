@@ -40,7 +40,7 @@
 import cron from "node-cron";
 import TrackingSession from "../models/trackingSession.model.js";
 import User from "../models/User.model.js";
-import { sendExpoAvailabilityPush } from "../utils/expoPush.js";
+import { sendPush } from "../utils/expoPush.js";
 
 export const startAvailabilityCron = () => {
   cron.schedule("*/5 * * * *", async () => {
@@ -58,7 +58,15 @@ export const startAvailabilityCron = () => {
         const user = await User.findById(s.userId);
         if (!user?.fcmToken) continue;
 
-        await sendExpoAvailabilityPush(user.fcmToken, s._id.toString());
+        await sendPush(
+          user.fcmToken,
+          "Call Availability",
+          "Are you available for call?",
+          {
+            sessionId: s._id.toString(),
+            type: "AVAILABILITY",
+          },
+        );
         console.log("📤 Sent to", user._id.toString());
       }
     } catch (err) {

@@ -31,39 +31,71 @@
 //   }
 // }
 
+// import fetch from "node-fetch";
+
+// export async function sendExpoAvailabilityPush(
+//   token: string,
+//   sessionId: string,
+// ) {
+//   const payload = {
+//     to: token,
+//     title: "Call Availability",
+//     body: "Are you available for call?",
+//     categoryId: "AVAILABILITY_ACTION",
+//     data: {
+//       type: "AVAILABILITY",
+//       sessionId,
+//     },
+//   };
+
+//   const res = await fetch("https://exp.host/--/api/v2/push/send", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Accept: "application/json",
+//     },
+//     body: JSON.stringify(payload),
+//   });
+
+//   const json: any = await res.json();
+
+//   if (json?.data?.status !== "ok") {
+//     console.error("❌ Expo Push Failed:", json);
+//   } else {
+//     console.log("✅ Expo Push Sent:", json.data.id);
+//   }
+
+//   return json;
+// }
+
 import fetch from "node-fetch";
 
-export async function sendExpoAvailabilityPush(
-  token: string,
-  sessionId: string,
+type PushData = Record<string, any>;
+
+export async function sendPush(
+  expoPushToken: string,
+  title: string,
+  body: string,
+  data?: PushData,
 ) {
-  const payload = {
-    to: token,
-    title: "Call Availability",
-    body: "Are you available for call?",
-    categoryId: "AVAILABILITY_ACTION",
-    data: {
-      type: "AVAILABILITY",
-      sessionId,
-    },
+  const message = {
+    to: expoPushToken,
+    sound: "default",
+    title,
+    body,
+    data,
   };
 
   const res = await fetch("https://exp.host/--/api/v2/push/send", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
+      "Accept-Encoding": "gzip, deflate",
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(message),
   });
 
-  const json: any = await res.json();
-
-  if (json?.data?.status !== "ok") {
-    console.error("❌ Expo Push Failed:", json);
-  } else {
-    console.log("✅ Expo Push Sent:", json.data.id);
-  }
-
+  const json = await res.json();
   return json;
 }

@@ -312,6 +312,7 @@
 
 import LocationPoint from "../models/locationPoint.model.js";
 import TrackingSession from "../models/trackingSession.model.js";
+import { sendPush } from "../utils/expoPush.js";
 
 /* ================= START TRACKING ================= */
 export const startTracking = async (req, res) => {
@@ -447,6 +448,46 @@ export const syncOfflinePoints = async (req, res) => {
 };
 
 /* ================= STOP TRACKING ================= */
+// export const stopTracking = async (req, res) => {
+//   try {
+//     const { sessionId, lat, lng, accuracy, endImage } = req.body;
+
+//     if (!sessionId || lat == null || lng == null || !endImage) {
+//       return res.status(400).json({ message: "Invalid stop data" });
+//     }
+
+//     const session = await TrackingSession.findById(sessionId);
+
+//     if (!session || session.userId.toString() !== req.user.id) {
+//       return res.status(403).json({ message: "Invalid session" });
+//     }
+
+//     if (session.endTime) {
+//       return res.status(400).json({ message: "Session already ended" });
+//     }
+
+//     await LocationPoint.create({
+//       userId: req.user.id,
+//       sessionId,
+//       lat,
+//       lng,
+//       accuracy,
+//       timestamp: new Date(),
+//     });
+
+//     await TrackingSession.findByIdAndUpdate(sessionId, {
+//       endTime: new Date(),
+//       endLocation: { lat, lng },
+//       endImage,
+//       isActive: false,
+//     });
+
+//     res.json({ ok: true });
+//   } catch (err) {
+//     console.error("STOP TRACK ERROR:", err);
+//     res.status(500).json({ message: "Stop tracking failed" });
+//   }
+// };
 export const stopTracking = async (req, res) => {
   try {
     const { sessionId, lat, lng, accuracy, endImage } = req.body;
@@ -478,7 +519,20 @@ export const stopTracking = async (req, res) => {
       endTime: new Date(),
       endLocation: { lat, lng },
       endImage,
+      isActive: false, // ✅ STOP CRON + STOP NOTIFICATIONS
     });
+
+    // ✅ optional confirmation push
+    if (req.user.expoPushToken) {
+      await sendPush(
+        req.user.expoPushToken,
+        "Tracking Ended",
+        "Your tracking session has been stopped",
+        { type: "TRACKING_STOPPED", sessionId },
+      );
+    }
+
+    console.log("🛑 Tracking stopped:", sessionId);
 
     res.json({ ok: true });
   } catch (err) {
