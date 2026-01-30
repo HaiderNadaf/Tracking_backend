@@ -313,6 +313,7 @@
 import LocationPoint from "../models/locationPoint.model.js";
 import TrackingSession from "../models/trackingSession.model.js";
 import { sendPush } from "../utils/expoPush.js";
+import AvailabilityResponse from "../models/AvailabilityResponse.model.js";
 
 /* ================= START TRACKING ================= */
 export const startTracking = async (req, res) => {
@@ -619,6 +620,34 @@ export const getUserLatestTrackingById = async (req, res) => {
   }
 };
 
+// export const getTrackingBySessionId = async (req, res) => {
+//   try {
+//     const { sessionId } = req.params;
+
+//     const session = await TrackingSession.findById(sessionId).populate(
+//       "userId",
+//       "name phone",
+//     );
+
+//     if (!session) {
+//       return res.json({ user: null, session: null, points: [] });
+//     }
+
+//     const points = await LocationPoint.find({
+//       sessionId: session._id,
+//     }).sort({ timestamp: 1 });
+
+//     res.json({
+//       user: session.userId,
+//       session,
+//       points,
+//     });
+//   } catch (err) {
+//     console.error("SESSION TRACK ERROR:", err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
 export const getTrackingBySessionId = async (req, res) => {
   try {
     const { sessionId } = req.params;
@@ -629,17 +658,34 @@ export const getTrackingBySessionId = async (req, res) => {
     );
 
     if (!session) {
-      return res.json({ user: null, session: null, points: [] });
+      return res.json({
+        user: null,
+        session: null,
+        points: [],
+        latestAvailability: null,
+        availabilityHistory: [],
+      });
     }
 
     const points = await LocationPoint.find({
       sessionId: session._id,
     }).sort({ timestamp: 1 });
 
+    // ✅ ALL availability responses for this session
+    const availabilityHistory = await AvailabilityResponse.find({
+      sessionId: session._id,
+    }).sort({ createdAt: -1 });
+
+    // ✅ latest response only
+    const latestAvailability =
+      availabilityHistory.length > 0 ? availabilityHistory[0] : null;
+
     res.json({
       user: session.userId,
       session,
       points,
+      latestAvailability, // for status badge
+      availabilityHistory, // for table / logs
     });
   } catch (err) {
     console.error("SESSION TRACK ERROR:", err);

@@ -12,6 +12,7 @@ import trackingRoutes from "./routes/tracking.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import { startAvailabilityCron } from "./cron/availability.cron.js";
 import availabilityRoutes from "./routes/availability.routes.js";
+import taskRoutes from "./routes/task.routes.js";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api/users", userRoutes);
+app.use("/api/tasks", taskRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/visits", visitRoutes);
 app.use("/api/loads", loadRoutes);
