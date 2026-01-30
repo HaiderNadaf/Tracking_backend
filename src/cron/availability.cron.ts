@@ -43,8 +43,11 @@ import User from "../models/User.model.js";
 import { sendPush } from "../utils/expoPush.js";
 
 export const startAvailabilityCron = () => {
-  cron.schedule("*/5 * * * *", async () => {
-    console.log("🔔 Availability reminder running...");
+  // ⏰ Runs every 30 minutes
+  cron.schedule("*/30 * * * *", async () => {
+    console.log("🔔 Availability reminder running (every 30 minutes)...");
+    // cron.schedule("*/5 * * * *", async () => {
+    //   console.log("🔔 Availability reminder running...");
 
     try {
       const sessions = await TrackingSession.find({ isActive: true });
